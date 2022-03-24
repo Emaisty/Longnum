@@ -49,7 +49,7 @@ public:
 
     friend istream &operator>>(istream &is, Longnum &Num) {
         string str;
-        cin >> str;
+        is >> str;
         for (int i = str.size() - 1; i >= 0; --i) {
             Num.number.push_back((int) str[i] - 48);
         }
@@ -61,9 +61,9 @@ public:
 
     friend ostream &operator<<(ostream &os, Longnum &Num) {
         for (int i = Num.number.size() - 1; i >= 0; --i) {
-            cout << Num.number[i];
+            os << Num.number[i];
         }
-        cout << ' ';
+        os << ' ';
         return os;
     }
 
