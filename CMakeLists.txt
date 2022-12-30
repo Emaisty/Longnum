@@ -3,4 +3,4 @@ project(Longnum)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(Longnum main.cpp)
+add_executable(Longnum Longnum.h Longnum.cpp main.cpp)
