@@ -85,7 +85,7 @@ Longnum::Longnum(long long int number) {
     }
 }
 
-Longnum::Longnum(std::string &number) {
+Longnum::Longnum(std::string number) {
 
 }
 
@@ -149,7 +149,7 @@ Longnum Longnum::operator+(const Longnum &second_number) const {
     }
     if (carry != 0 && !big_number.isNegativ && !low_number.isNegativ)
         res.number.push_back(1);
-    while (res.number[res.number.size() - 1] == 255 && res.isNegativ)
+    while (res.number[res.number.size() - 1] == 255 && res.isNegativ && res.number.size() != 1)
         res.number.erase(res.number.begin() + res.number.size() - 1, res.number.end());
     while (res.number[res.number.size() - 1] == 0 && !res.isNegativ)
         res.number.erase(res.number.begin() + res.number.size() - 1, res.number.end());
@@ -173,6 +173,31 @@ Longnum Longnum::operator-() const {
     return res;
 }
 
+Longnum Longnum::operator-(const Longnum &second_number) const {
+    Longnum tmp = -second_number;
+    return *this + tmp;
+}
+
+Longnum Longnum::operator-(const long int second_number) const {
+    Longnum sec_number(second_number);
+    return *this - sec_number;
+}
+
+Longnum Longnum::operator*(const Longnum &second_number) const {
+    Longnum res;
+    for (int i = 0; abs(second_number) > i; ++i) {
+        res = res + *this;
+    }
+    if (second_number.isNegativ)
+        res = -res;
+    return res;
+}
+
+Longnum Longnum::operator*(const long int second_number) const {
+    Longnum sec_number(second_number);
+    return *this * sec_number;
+}
+
 bool Longnum::operator<(const Longnum &second_number) const {
     if (this->isNegativ && !second_number.isNegativ)
         return true;
@@ -190,9 +215,9 @@ bool Longnum::operator<(const Longnum &second_number) const {
         return false;
     // If length of them are equal
     for (unsigned long int i = second_number.number.size(); i > 0; --i) {
-        if (second_number.number[i-1] > this->number[i-1])
+        if (second_number.number[i - 1] > this->number[i - 1])
             return true;
-        if (second_number.number[i-1] < this->number[i-1])
+        if (second_number.number[i - 1] < this->number[i - 1])
             return false;
     }
     return false;
