@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <ostream>
+#include <iostream>
 
 
 class Longnum {
@@ -35,17 +36,37 @@ public:
 
     Longnum operator-() const;
 
+    Longnum operator++();
+
+    Longnum operator--();
+
+    Longnum operator++(int);
+
+    Longnum operator--(int);
+
     bool operator<(const Longnum &second_number) const;
+
+    bool operator<(long int second_number) const;
 
     bool operator>(const Longnum &second_number) const;
 
+    bool operator>(long int second_number) const;
+
     bool operator==(const Longnum &second_number) const;
+
+    bool operator==(long int second_number) const;
 
     bool operator!=(const Longnum &second_number) const;
 
+    bool operator!=(long int second_number) const;
+
     bool operator<=(const Longnum &second_number) const;
 
+    bool operator<=(long int second_number) const;
+
     bool operator>=(const Longnum &second_number) const;
+
+    bool operator>=(long int second_number) const;
 
 private:
     std::vector<unsigned char> number;

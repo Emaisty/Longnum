@@ -79,9 +79,8 @@ Longnum::Longnum(long long int number) {
         cur_bit++;
     }
     if (isNegativ) {
-        Longnum tmp;
-        tmp = this->operator-();
-        this->number = tmp.number;
+        isNegativ = !isNegativ;
+        *this = -*this;
     }
 }
 
@@ -124,14 +123,14 @@ Longnum Longnum::operator+(const Longnum &second_number) const {
         low_number = second_number;
     }
 
-    res.isNegativ = big_number.isNegativ;
+    res.isNegativ = !(abs(*this) == abs(second_number)) && big_number.isNegativ;
+    big_number.number.resize(big_number.number.size() + 1);
     low_number.number.resize(big_number.number.size());
 
-    if (low_number.isNegativ) {
-        for (unsigned long int i = std::min(this->number.size(), second_number.number.size());
-             i < std::max(this->number.size(), second_number.number.size()); ++i) {
-            low_number.number[i] = 255;
-        }
+    big_number.number[big_number.number.size() - 1] = big_number.isNegativ ? 255 : 0;
+
+    for (int i = std::min(this->number.size(), second_number.number.size()); i < big_number.number.size(); ++i) {
+        low_number.number[i] = low_number.isNegativ ? 255 : 0;
     }
 
     unsigned short int carry = 0;
@@ -147,11 +146,10 @@ Longnum Longnum::operator+(const Longnum &second_number) const {
             res.number.push_back((unsigned char) sum_of_blocks);
         carry = sum_of_blocks >> 8;
     }
-    if (carry != 0 && !big_number.isNegativ && !low_number.isNegativ)
-        res.number.push_back(1);
+
     while (res.number[res.number.size() - 1] == 255 && res.isNegativ && res.number.size() != 1)
         res.number.erase(res.number.begin() + res.number.size() - 1, res.number.end());
-    while (res.number[res.number.size() - 1] == 0 && !res.isNegativ)
+    while (res.number[res.number.size() - 1] == 0 && !res.isNegativ && res.number.size() != 1)
         res.number.erase(res.number.begin() + res.number.size() - 1, res.number.end());
 
     return res;
@@ -160,17 +158,6 @@ Longnum Longnum::operator+(const Longnum &second_number) const {
 Longnum Longnum::operator+(const long int second_number) const {
     Longnum sec_number(second_number);
     return *this + sec_number;
-}
-
-Longnum Longnum::operator-() const {
-    Longnum res;
-    res.number.resize(this->number.size());
-    for (int i = 0; i < this->number.size(); ++i) {
-        res.number[i] = ~this->number[i];
-    }
-    res = res + 1;
-    res.isNegativ = !isNegativ;
-    return res;
 }
 
 Longnum Longnum::operator-(const Longnum &second_number) const {
@@ -187,6 +174,7 @@ Longnum Longnum::operator*(const Longnum &second_number) const {
     Longnum res;
     for (int i = 0; abs(second_number) > i; ++i) {
         res = res + *this;
+        std::cout << res << std::endl;
     }
     if (second_number.isNegativ)
         res = -res;
@@ -196,6 +184,39 @@ Longnum Longnum::operator*(const Longnum &second_number) const {
 Longnum Longnum::operator*(const long int second_number) const {
     Longnum sec_number(second_number);
     return *this * sec_number;
+}
+
+Longnum Longnum::operator-() const {
+    Longnum res;
+    res.number.resize(this->number.size());
+    for (int i = 0; i < this->number.size(); ++i) {
+        res.number[i] = ~this->number[i];
+    }
+    res = res + 1;
+    res.isNegativ = !isNegativ;
+    return res;
+}
+
+Longnum Longnum::operator++() {
+    *this = *this + 1;
+    return *this;
+}
+
+Longnum Longnum::operator--() {
+    *this = *this - 1;
+    return *this;
+}
+
+Longnum Longnum::operator++(int) {
+    Longnum res(*this);
+    *this = *this + 1;
+    return res;
+}
+
+Longnum Longnum::operator--(int) {
+    Longnum res(*this);
+    *this = *this - 1;
+    return res;
 }
 
 bool Longnum::operator<(const Longnum &second_number) const {
@@ -223,24 +244,48 @@ bool Longnum::operator<(const Longnum &second_number) const {
     return false;
 }
 
+bool Longnum::operator<(long int second_number) const {
+    return *this < (Longnum) second_number;
+}
+
 bool Longnum::operator>(const Longnum &second_number) const {
     return !(*this < second_number) && *this != second_number;
+}
+
+bool Longnum::operator>(long int second_number) const {
+    return *this > (Longnum) second_number;
 }
 
 bool Longnum::operator==(const Longnum &second_number) const {
     return !(*this < second_number) && !(second_number < *this);
 }
 
+bool Longnum::operator==(long int second_number) const {
+    return *this == (Longnum) second_number;
+}
+
 bool Longnum::operator!=(const Longnum &second_number) const {
     return !(*this == second_number);
+}
+
+bool Longnum::operator!=(long int second_number) const {
+    return *this != (Longnum) second_number;
 }
 
 bool Longnum::operator<=(const Longnum &second_number) const {
     return *this < second_number || *this == second_number;
 }
 
+bool Longnum::operator<=(long int second_number) const {
+    return *this <= (Longnum) second_number;
+}
+
 bool Longnum::operator>=(const Longnum &second_number) const {
     return *this > second_number || *this == second_number;
+}
+
+bool Longnum::operator>=(long int second_number) const {
+    return *this >= (Longnum) second_number;
 }
 
 

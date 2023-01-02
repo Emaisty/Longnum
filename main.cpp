@@ -9,11 +9,9 @@ using namespace std;
 
 int main() {
     test();
-    Longnum kek, lol;
-    kek = 12;
-    lol = 13;
-    kek = kek*lol;
-    cout << kek * -2;
-
+    Longnum num1(3), num2(-3), res(0);
+    for (Longnum i = 0; i < num1; ++i) {
+        cout << i << endl;
+    }
     return 0;
 }
