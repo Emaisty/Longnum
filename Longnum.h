@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 #include <ostream>
-#include <iostream>
+#include <cmath>
 
 
 class Longnum {
@@ -33,6 +33,22 @@ public:
     Longnum operator*(const Longnum &second_number) const;
 
     Longnum operator*(long int second_number) const;
+
+    Longnum operator/(const Longnum &second_number) const;
+
+    Longnum operator/(long int second_number) const;
+
+    Longnum operator%(const Longnum &second_number) const;
+
+    Longnum operator%(long int second_number) const;
+
+    Longnum operator<<(const Longnum &second_number) const;
+
+    Longnum operator<<(long int second_number) const;
+
+    Longnum operator>>(const Longnum &second_number) const;
+
+    Longnum operator>>(long int second_number) const;
 
     Longnum operator-() const;
 
@@ -74,5 +90,7 @@ private:
 };
 
 Longnum abs(const Longnum &num);
+
+Longnum pow(const Longnum &first_number, const Longnum &second_number);
 
 #endif //LONGNUM_LONGNUM_H

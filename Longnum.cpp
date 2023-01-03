@@ -2,11 +2,11 @@
 
 std::string sum_numbers(const std::string &first_number, const std::string &second_number) {
     for (unsigned long int i = 0; i < first_number.size(); ++i) {
-        if (first_number[i] < '0' || first_number[i] > '9' || (i == 0 && first_number[i] == '-'))
+        if (first_number[i] < '0' || first_number[i] > '9')
             throw std::invalid_argument("first_number not in integer form");
     }
     for (unsigned long int i = 0; i < second_number.size(); ++i) {
-        if (second_number[i] < '0' || second_number[i] > '9' || (i == 0 && second_number[i] == '-'))
+        if (second_number[i] < '0' || second_number[i] > '9')
             throw std::invalid_argument("second_number not in integer form");
     }
     std::string res, big_number, low_number;
@@ -43,7 +43,7 @@ std::string pow_of_2(unsigned long int n) {
         return "1";
     std::string base = "2";
 
-    for (int i = 1; i < n; ++i) {
+    for (long long int i = 1; i < n; ++i) {
         base = sum_numbers(base, base);
     }
     return base;
@@ -70,7 +70,7 @@ Longnum::Longnum(long long int number) {
         }
 
         // last significant bit
-        int reminder = number % 2;
+        long long int reminder = number % 2;
         number /= 2;
 
         this->number[this->number.size() - 1] |= (reminder << cur_bit);
@@ -85,7 +85,27 @@ Longnum::Longnum(long long int number) {
 }
 
 Longnum::Longnum(std::string number) {
-
+    //TODO check for it correctness
+    for (unsigned long int i = 0; i < number.size(); ++i) {
+        if (number[i] < '0' || number[i] > '9' || (i == 0 && number[i] == '-') ||
+            (number[0] == '-' && number.size() == 1))
+            throw std::invalid_argument("number not in integer form");
+    }
+    int i = 0;
+    if (number[0] == '-') {
+        isNegativ = true;
+        i++;
+    }
+    Longnum res;
+    for (; i < number.size(); ++i) {
+        int digit = number[i] - 48;
+        res = res + ((Longnum) digit * pow(10, number.size() - i - 1));
+    }
+    this->number = res.number;
+    if (isNegativ) {
+        isNegativ = !isNegativ;
+        *this = -*this;
+    }
 }
 
 std::string Longnum::toString() const {
@@ -93,12 +113,11 @@ std::string Longnum::toString() const {
     Longnum tmp = *this;
     if (tmp.isNegativ)
         tmp = -tmp;
-    for (int i = 0; i < tmp.number.size(); ++i) {
-        for (int j = 0; j < 8; ++j) {
+    for (long long int i = 0; i < tmp.number.size(); ++i) {
+        for (long long int j = 0; j < 8; ++j) {
             if (tmp.number[i] & (1 << j))
                 res = sum_numbers(res, pow_of_2(8 * i + j));
         }
-
     }
     if (this->isNegativ)
         res.push_back('-');
@@ -129,7 +148,8 @@ Longnum Longnum::operator+(const Longnum &second_number) const {
 
     big_number.number[big_number.number.size() - 1] = big_number.isNegativ ? 255 : 0;
 
-    for (int i = std::min(this->number.size(), second_number.number.size()); i < big_number.number.size(); ++i) {
+    for (long long int i = std::min(this->number.size(), second_number.number.size());
+         i < big_number.number.size(); ++i) {
         low_number.number[i] = low_number.isNegativ ? 255 : 0;
     }
 
@@ -156,8 +176,7 @@ Longnum Longnum::operator+(const Longnum &second_number) const {
 }
 
 Longnum Longnum::operator+(const long int second_number) const {
-    Longnum sec_number(second_number);
-    return *this + sec_number;
+    return *this + (Longnum) second_number;
 }
 
 Longnum Longnum::operator-(const Longnum &second_number) const {
@@ -166,15 +185,14 @@ Longnum Longnum::operator-(const Longnum &second_number) const {
 }
 
 Longnum Longnum::operator-(const long int second_number) const {
-    Longnum sec_number(second_number);
-    return *this - sec_number;
+    return *this - (Longnum) second_number;
 }
 
 Longnum Longnum::operator*(const Longnum &second_number) const {
+    //TODO rewrite
     Longnum res;
     for (int i = 0; abs(second_number) > i; ++i) {
         res = res + *this;
-        std::cout << res << std::endl;
     }
     if (second_number.isNegativ)
         res = -res;
@@ -182,8 +200,78 @@ Longnum Longnum::operator*(const Longnum &second_number) const {
 }
 
 Longnum Longnum::operator*(const long int second_number) const {
-    Longnum sec_number(second_number);
-    return *this * sec_number;
+    return *this * (Longnum) second_number;
+}
+
+Longnum Longnum::operator/(const Longnum &second_number) const {
+
+    Longnum res, tmp, number1, number2;
+
+    number1 = abs(*this);
+    number2 = abs(second_number);
+    res = number1;
+
+    for (unsigned long i = number1.number.size(); i > 0; --i) {
+        for (int j = 7; j >= 0; --j) {
+            tmp = tmp + tmp;
+            if (number1.number[i - 1] & (1 << j)) tmp++;
+
+            if (tmp >= number2) {
+                tmp = tmp - number2;
+                res.number[i - 1] |= (1 << j);
+            } else
+                res.number[i - 1] &= (255 - (1 << j));
+        }
+    }
+    if (this->isNegativ != second_number.isNegativ)
+        res = -res;
+    return res;
+}
+
+Longnum Longnum::operator/(const long int second_number) const {
+    return *this / (Longnum) second_number;
+}
+
+Longnum Longnum::operator%(const Longnum &second_number) const {
+
+    Longnum res, tmp, number1, number2;
+
+    number1 = abs(*this);
+    number2 = abs(second_number);
+    res = number1;
+
+    for (unsigned long i = number1.number.size(); i > 0; --i) {
+        for (int j = 7; j >= 0; --j) {
+            tmp = tmp + tmp;
+            if (number1.number[i - 1] & (1 << j)) tmp++;
+
+            if (tmp >= number2) {
+                tmp = tmp - number2;
+                res.number[i - 1] |= (1 << j);
+            } else
+                res.number[i - 1] &= (255 - (1 << j));
+        }
+    }
+    return tmp;
+}
+
+Longnum Longnum::operator%(const long int second_number) const {
+    return *this % (Longnum) second_number;
+}
+
+Longnum Longnum::operator<<(const Longnum &second_number) const {
+
+}
+
+Longnum Longnum::operator<<(const long int second_number) const {
+    return *this << (Longnum) second_number;
+}
+
+Longnum Longnum::operator>>(const Longnum &second_number) const {
+}
+
+Longnum Longnum::operator>>(const long int second_number) const {
+    return *this >> (Longnum) second_number;
 }
 
 Longnum Longnum::operator-() const {
@@ -294,5 +382,18 @@ Longnum abs(const Longnum &num) {
     res = num;
     if (num < tmp)
         return -res;
+    return res;
+}
+
+Longnum pow(const Longnum &first_number, const Longnum &second_number) {
+    if (second_number < 0)
+        throw std::invalid_argument("Cannot make number in non positive value");
+    if (second_number == 0)
+        return (Longnum) 1;
+    Longnum res = first_number;
+    int j = 0;
+    for (Longnum i = 1; i < second_number; ++i, ++j) {
+        res = res * first_number;
+    }
     return res;
 }

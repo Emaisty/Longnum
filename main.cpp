@@ -8,10 +8,8 @@
 using namespace std;
 
 int main() {
-    test();
-    Longnum num1(3), num2(-3), res(0);
-    for (Longnum i = 0; i < num1; ++i) {
-        cout << i << endl;
-    }
+//    test();
+    Longnum a = 4, b = 7;
+    cout << b % a;
     return 0;
 }
